@@ -66,6 +66,11 @@
                     placeholder="Shared JSON data will appear here..." readonly></textarea>
             </div>
         </div>
+
+        <!-- Logout -->
+        <div>
+            <a href="#" onclick="localStorage.removeItem('data'); location.reload();">Logout</a>
+        </div>
     </div>
 
     <script>
@@ -76,15 +81,30 @@
 
         // Mostrar el modal al cargar la página
         document.addEventListener("DOMContentLoaded", () => {
-            const loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
-            loginModal.show();
+            // Obtener el nombre de usuario de local storage
+            const data = localStorage.getItem('data');
+            if (data) {
+                const { username, password, nodeName } = JSON.parse(data);
+                connect({ username, password, nodeName });
+            } else {
+                const loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
+                loginModal.show();
+            }
         });
 
         // Conectar al nodo compartido usando la clave de usuario y contraseña
-        async function connect() {
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const nodeName = document.getElementById('nodeName').value;
+        async function connect(data) {
+            if (!data) {
+                data = {
+                    username: document.getElementById('username').value,
+                    password: document.getElementById('password').value,
+                    nodeName: document.getElementById('nodeName').value
+                };
+            }
+            const { username, password, nodeName } = data;
+
+            // save username and password in local storage
+            localStorage.setItem('data', JSON.stringify({ username, password, nodeName }));
 
             // Crear o autenticar usuario en GUN
             gun.user().auth(username, password, async (ack) => {
