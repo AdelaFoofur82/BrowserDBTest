@@ -119,7 +119,7 @@
 
             async function onData(data) {
                 if (data) {
-                    const {_, ...decryptedData} = await Gun.SEA.decrypt(data, encryptionKey);
+                    const { _, ...decryptedData } = await Gun.SEA.decrypt(data, encryptionKey);
                     document.getElementById('sharedData').value = JSON.stringify(decryptedData, null, 2);
                 }
             }
@@ -152,7 +152,7 @@
 
                 // Cifrar los datos antes de guardarlos
                 const encryptedData = await Gun.SEA.encrypt(newData, encryptionKey);
-                db.put(encryptedData);
+                db.put({ data: encryptedData });
 
                 // show it on textarea
                 document.getElementById('sharedData').value = JSON.stringify(newData, null, 2);
