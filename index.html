@@ -120,7 +120,7 @@
             async function onData(data) {
                 if (data) {
                     // const decryptedData = await Gun.SEA.decrypt(data, encryptionKey);
-                    const decryptedData = data;
+                    const {_, decryptedData} = {_, ...data};
                     document.getElementById('sharedData').value = JSON.stringify(decryptedData, null, 2);
                 }
             }
