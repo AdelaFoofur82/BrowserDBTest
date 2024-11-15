@@ -77,7 +77,7 @@
         // Inicializamos GUN
         const gun = Gun(['https://gun-manhattan.herokuapp.com/gun']); // Peer público
         let db;  // Nodo de datos compartidos
-        let encryptionKey; // Clave de cifrado generada con el usuario y contraseña
+        let encryptionKey = 'sf320320r93j20f9j0sdmspi3·"$FSDF"·%T"f'; // Clave de cifrado
 
         // Mostrar el modal al cargar la página
         document.addEventListener("DOMContentLoaded", () => {
@@ -134,30 +134,15 @@
 
         // Función para configurar la conexión a la base de datos compartida
         async function setupDatabaseConnection(nodeName) {
-            // Generar un par de claves (pair) para el usuario
-            encryptionKey = await Gun.SEA.pair();
+            // Conectar al nodo con el nombre especificado
+            db = gun.get(nodeName);
 
-            async function onData(data) {
+            // Escuchar cambios en el nodo compartido
+            db.on(async (data) => {
                 if (data) {
                     const decryptedData = await Gun.SEA.decrypt(data.data, encryptionKey);
                     document.getElementById('sharedData').value = JSON.stringify(decryptedData, null, 2);
                 }
-            }
-
-            // Conectar al nodo con el nombre especificado
-            db = gun.get(nodeName, (ack) => {
-                if (ack.err) {
-                    alert("Error al conectar al nodo compartido: " + ack.err);
-                    return;
-                }
-                if (ack.put) {
-                    onData(ack.put);
-                }
-            });
-
-            // Escuchar cambios en el nodo compartido
-            db.on(async (data) => {
-                onData(data);
             });
 
             // Ocultar el modal
