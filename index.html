@@ -70,7 +70,8 @@
 
         <!-- Logout -->
         <div>
-            <a href="#" onclick="localStorage.removeItem('data'); location.reload();">Logout</a>
+            <a href="#" onclick="localStorage.removeItem('data'); location.reload();">Logout</a> (Usuario: <span
+                id="usernameSpan"></span>, Nodo: <span id="nodeNameSpan"></span>)
         </div>
     </div>
 
@@ -103,6 +104,10 @@
                 };
             }
             const { username, password, nodeName } = data;
+
+            // Mostrar el nombre de usuario y el nombre del nodo en la interfaz
+            document.getElementById('usernameSpan').innerText = username;
+            document.getElementById('nodeNameSpan').innerText = nodeName;
 
             // save username and password in local storage
             localStorage.setItem('data', JSON5.stringify({ username, password, nodeName }));
@@ -154,17 +159,29 @@
         async function saveData() {
             try {
                 const newData = JSON5.parse(document.getElementById('importData').value);
-                newData.timestamp = new Date().toISOString();
+
+                if (Array.isArray(newData)) {
+                    alert("Invalid JSON data! Give an object");
+                    return;
+                }
+
+                // we get the data from the shared node
+                const data = await db.once().then((data) => {
+                    const decryptedData = Gun.SEA.decrypt(data.data, encryptionKey);
+                    return decryptedData;
+                });
 
                 // Cifrar los datos antes de guardarlos
-                const encryptedData = await Gun.SEA.encrypt(newData, encryptionKey);
+                const encryptedData = await Gun.SEA.encrypt({...data, ...newData}, encryptionKey);
+
                 db.put({ data: encryptedData });
 
                 // show it on textarea
-                document.getElementById('sharedData').value = JSON5.stringify(newData, null, 2);
+                document.getElementById('sharedData').value = JSON5.stringify({...data, ...newData}, null, 2);
 
                 // Limpiar el área de importación
                 document.getElementById('importData').value = '';
+
             } catch (error) {
                 alert("Invalid JSON data!");
             }
